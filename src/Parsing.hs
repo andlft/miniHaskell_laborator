@@ -24,7 +24,7 @@ testParse p s
       Right a -> a
 
 var :: Parser Var
-var = Var <$> (identifier miniHs <|> operators miniHs)
+var = Var <$> (identifier miniHs <|> operator miniHs)
 -- >>> testParse var "b is a var"
 -- Var {getVar = "b"}
 
@@ -36,10 +36,10 @@ varExp = CX <$> var
 lambdaExp :: Parser ComplexExp
 lambdaExp = do
     reservedOp miniHs "\\"
-    v <- varExp
+    v <- var
     reservedOp miniHs "->"
     cex <- expr
-    return CLam v cex
+    return (CLam v cex)
 
 -- >>> testParse lambdaExp "\\x -> x"
 -- CLam (Var {getVar = "x"}) (CX (Var {getVar = "x"}))
@@ -74,7 +74,7 @@ listExp = List <$> brackets miniHs (commaSep miniHs expr)
 -- List [CX (Var {getVar = "a"}),CX (Var {getVar = "b"}),CX (Var {getVar = "c"})]
 
 natExp :: Parser ComplexExp
-natExp = Nat <$> fromInteger ( natural miniHs)
+natExp = Nat <$> fromInteger <$> ( natural miniHs)
 -- >>> ghci> testParse natExp "223 a"
 -- Nat 223
 
@@ -94,8 +94,13 @@ basicExp = letrecExp
 -- >>> testParse basicExp "[a,b,c]"
 -- List [CX (Var {getVar = "a"}),CX (Var {getVar = "b"}),CX (Var {getVar = "c"})]
 
+
+
 expr :: Parser ComplexExp
-expr = varExp
+expr = do
+    es <- some (basicExp)
+    return $ foldl1 CApp es
+
 -- >>> testParse expr "\\x -> [x,y,z]"
 -- CLam (Var {getVar = "x"}) (List [CX (Var {getVar = "x"}),CX (Var {getVar = "y"}),CX (Var {getVar = "z"})])
 
