@@ -9,6 +9,8 @@ import Parsing
 import Printing
 import REPLCommand
 import Text.ParserCombinators.Parsec(parse)
+import Eval
+import Sugar
 
 main :: IO ()
 main = do
