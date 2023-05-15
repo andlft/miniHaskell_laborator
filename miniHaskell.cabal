@@ -25,6 +25,8 @@ source-repository head
 
 library
   exposed-modules:
+      CurryHowardTyped
+      CurryHowardUntyped
       Eval
       Exp
       Lib
